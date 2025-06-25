@@ -106,7 +106,7 @@ bash
 
 # Clone & Install
 
-git clone https://github.com/yourusername/ExpenseLynx.git
+git clone https://github.com/Sadashrayr/Expense-tracker.git
 cd ExpenseLynx
 pip install -r requirements.txt
 
