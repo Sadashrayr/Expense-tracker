@@ -1,0 +1,49 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+  <div class="text-center my-5">
+    <h1 class="display-4 fw-bold text-purple">Welcome to ExpenseLynx</h1>
+    <p class="lead text-muted">Track, analyze, and optimize your personal finances effortlessly.</p>
+    {% if not current_user.is_authenticated %}
+    <div class="mt-4">
+      <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg me-3">
+        <i class="fas fa-sign-in-alt me-2"></i>Login
+      </a>
+      <a href="{{ url_for('register') }}" class="btn btn-light btn-lg text-dark">
+        <i class="fas fa-user-plus me-2"></i>Register
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="row text-center mb-5">
+    <div class="col-md-4 mb-4">
+      <div class="feature-card p-4 shadow-sm rounded-4">
+        <div class="feature-icon mb-3 text-purple fs-2">
+          <i class="fas fa-chart-pie"></i>
+        </div>
+        <h5 class="fw-semibold">Expense Categorization</h5>
+        <p class="text-muted">Automatically categorize your expenses for better financial insight.</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="feature-card p-4 shadow-sm rounded-4">
+        <div class="feature-icon mb-3 text-purple fs-2">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h5 class="fw-semibold">AI Assistant</h5>
+        <p class="text-muted">Chat with our assistant for insights and savings suggestions.</p>
+      </div>
+    </div>
+    <div class="col-md-4 mb-4">
+      <div class="feature-card p-4 shadow-sm rounded-4">
+        <div class="feature-icon mb-3 text-purple fs-2">
+          <i class="fas fa-chart-line"></i>
+        </div>
+        <h5 class="fw-semibold">Monthly & Yearly Trends</h5>
+        <p class="text-muted">Visualize your financial growth with interactive graphs.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

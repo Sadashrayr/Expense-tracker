@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{# {% block head %}
+<style>
+  body {
+    background-color: #1e1e2f;
+    color: #f0f0f0;
+  }
+
+  .history-container {
+    max-width: 800px;
+    margin: auto;
+    background: #292946;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  }
+
+  .chat-log {
+    background-color: #3a3a5c;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+  }
+
+  .chat-log p {
+    margin-bottom: 0.4rem;
+  }
+
+  .user-msg {
+    color: #9cdcfe;
+    font-weight: bold;
+  }
+
+  .ai-msg {
+    color: #f0f0f0;
+  }
+</style>
+{% endblock %} #}
+
+
+{% block head %}
+<style>
+  body {
+    background-color: #f8f9fa;
+    color: #212529;
+  }
+
+  .history-container {
+    max-width: 800px;
+    margin: auto;
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .chat-log {
+    background-color: #f1f3f5;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+    border: 1px solid #dee2e6;
+  }
+
+  .chat-log p {
+    margin-bottom: 0.4rem;
+  }
+
+  .user-msg {
+    color: #0d6efd; /* Bootstrap primary blue */
+    font-weight: 600;
+  }
+
+  .ai-msg {
+    color: #495057; /* Bootstrap muted dark */
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="history-container">
+    <h2 class="text-center mb-4">🕘 AI Chat History</h2>
+    {% if chat_history %}
+      {% for entry in chat_history %}
+        <div class="chat-log">
+            <p class="user-msg">You: {{ entry.question }}</p>
+            <p class="ai-msg">AI: {{ entry.answer }}</p>
+            <p class="text-muted small">🕒 {{ entry.timestamp.strftime('%Y-%m-%d %I:%M %p') }}</p>
+        </div>
+      {% endfor %}
+    {% else %}
+      <p class="text-center">No chat history available yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,231 @@
+{% extends "layout.html" %}
+
+{#{% block head %}
+<style>
+  .dashboard-card {
+    transition: transform 0.2s;
+    height: 100%;
+  }
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+  .card-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+  }
+  .status-indicator {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+  .status-good { background-color: #28a745; }
+  .status-warning { background-color: #ffc107; }
+  .status-danger { background-color: #dc3545; }
+</style>
+{% endblock %}  #}
+
+{% block head %}
+<style>
+  .dashboard-card {
+    transition: transform 0.2s;
+    height: 100%;
+    background-color: #ffffff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    padding: 1rem;
+    color: #212529;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .card-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+  }
+
+  .status-indicator {
+    width: 15px;
+    height: 15px;
+    display: inline-block;
+    border-radius: 50%;
+    margin-right: 5px;
+  }
+
+  .status-good {
+    background-color: var(--success-color);
+  }
+
+  .status-warning {
+    background-color: var(--warning-color);
+  }
+
+  .status-danger {
+    background-color: var(--danger-color);
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="dashboard-header mb-4">
+    <h1 class="display-5 mb-3">Your Financial Dashboard</h1>
+    <div class="date-range text-muted">
+      <i class="far fa-calendar-alt me-2"></i>Analysis based on your uploaded data
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <form method="GET" class="row g-3 mb-4">
+    <div class="col-md-3">
+      <label class="form-label">Data Scope</label>
+      <select name="scope" class="form-select">
+        <option value="present" {% if data_scope == 'present' %}selected{% endif %}>Current</option>
+        <option value="past" {% if data_scope == 'past' %}selected{% endif %}>Past</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Time View</label>
+      <select name="view" class="form-select">
+        <option value="weekly" {% if view_type == 'weekly' %}selected{% endif %}>Weekly</option>
+        <option value="monthly" {% if view_type == 'monthly' %}selected{% endif %}>Monthly</option>
+        <option value="yearly" {% if view_type == 'yearly' %}selected{% endif %}>Yearly</option>
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">Data Source</label>
+      <select name="source" class="form-select">
+        <option value="manual" {% if source == 'manual' %}selected{% endif %}>Manual</option>
+        <option value="csv" {% if source == 'csv' %}selected{% endif %}>CSV</option>
+      </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+    </div>
+  </form>
+
+  {% if budget_status %}
+  <!-- Budget Cards -->
+  <div class="row mb-4">
+    <div class="col-md-3 summary-box bg-primary text-white">Budget<br><strong>₹{{ budget_status.budget }}</strong></div>
+    <div class="col-md-3 summary-box bg-info">Total Expenses<br><strong>₹{{ budget_status.total }}</strong></div>
+    <div class="col-md-3 summary-box bg-light text-dark">Remaining<br><strong>₹{{ budget_status.remaining }}</strong></div>
+    <div class="col-md-3 summary-box 
+      {% if budget_status.percentage > 100 %} bg-danger
+      {% elif budget_status.percentage > 80 %} bg-warning
+      {% else %} bg-success {% endif %}">
+      Budget Usage<br><strong>{{ budget_status.percentage | round(1) }}%</strong><br>
+      {% if budget_status.percentage > 100 %}<small>Over Budget!</small>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Pie & Trend Charts -->
+  <div class="row">
+    <div class="col-md-6">
+      <h5>{{ 'Current' if data_scope == 'present' else 'Past' }} Category Distribution</h5>
+      <canvas id="pieChart"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h5>Spending Trend</h5>
+      <canvas id="trendChart"></canvas>
+    </div>
+  </div>
+
+  <!-- Category Table -->
+  <h4 class="mt-5">{{ 'Current' if data_scope == 'present' else 'Past' }} Category Summary</h4>
+  <table class="table table-dark table-striped">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>%</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in category_table %}
+      <tr>
+        <td>{{ row.category | title }}</td>
+        <td>{{ row.amount }}</td>
+        <td>{{ row.percent }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <!-- 🔁 Divider -->
+  <hr class="my-5" />
+  <h3 class="text-center text-muted">🕰️ Historical Expense Overview</h3>
+
+  <div class="row mt-4">
+    <div class="col-md-6">
+      <h5>Historical Expenses by Category</h5>
+      <canvas id="historyPie"></canvas>
+    </div>
+    <div class="col-md-6">
+      <h5>History Summary Table</h5>
+      <table class="table table-light table-striped">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Amount</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in history_table %}
+          <tr>
+            <td>{{ row.category | title }}</td>
+            <td>{{ row.amount }}</td>
+            <td>{{ row.percent }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const pieData = {
+    labels: {{ pie_data["labels"] | tojson }},
+    datasets: [{
+      label: "Expense Share",
+      data: {{ pie_data["values"] | tojson }},
+      backgroundColor: ['#4e79a7', '#f28e2b', '#e15759', '#76b7b2', '#59a14f', '#edc949', '#af7aa1']
+    }]
+  };
+
+  const trendData = {
+    labels: {{ trend_data["labels"] | tojson }},
+    datasets: [{
+      label: "Monthly Spending",
+      data: {{ trend_data["values"] | tojson }},
+      fill: false,
+      borderColor: "#007bff",
+      tension: 0.3
+    }]
+  };
+
+  const historyPieData = {
+    labels: {{ history_pie["labels"] | tojson }},
+    datasets: [{
+      label: "History",
+      data: {{ history_pie["values"] | tojson }},
+      backgroundColor: ['#a0cbe8', '#ffbe7d', '#ff9d9a', '#9c755f', '#bab0ab', '#d37295', '#fabfd2']
+    }]
+  };
+
+  new Chart(document.getElementById("pieChart"), { type: "pie", data: pieData });
+  new Chart(document.getElementById("trendChart"), { type: "line", data: trendData });
+  new Chart(document.getElementById("historyPie"), { type: "doughnut", data: historyPieData });
+</script>
+{% endblock %}

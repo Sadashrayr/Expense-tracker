@@ -1,0 +1,195 @@
+{% extends "layout.html" %}
+
+{# {% block head %}
+<style>
+  .chat-wrapper {
+    max-width: 800px;
+    margin: auto;
+    padding: 1rem;
+  }
+
+  .chat-window {
+    background: #1e1e2f;
+    padding: 2rem;
+    border-radius: 12px;
+    color: white;
+    min-height: 400px;
+  }
+
+  .message {
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    max-width: 80%;
+    line-height: 1.5;
+    word-wrap: break-word;
+  }
+
+  .user-msg {
+    background-color: #2d3e50;
+    margin-left: auto;
+    text-align: right;
+  }
+
+  .bot-msg {
+    background-color: #31364a;
+    margin-right: auto;
+  }
+
+  .typing {
+    display: inline-block;
+    font-size: 1.2rem;
+  }
+
+  .suggestions {
+    margin-top: 1.5rem;
+  }
+
+  .suggestions button {
+    margin: 0.3rem;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+  }
+
+  input[type="text"] {
+    border-radius: 8px;
+  }
+</style>
+{% endblock %} #}
+
+
+
+{% block head %}
+<style>
+  .chat-wrapper {
+    max-width: 800px;
+    margin: auto;
+    padding: 1rem;
+  }
+
+  .chat-window {
+    background: #ffffff;
+    padding: 2rem;
+    border-radius: 12px;
+    color: #212529;
+    min-height: 400px;
+    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+  }
+
+  .message {
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 1rem;
+    border-radius: 16px;
+    max-width: 80%;
+    line-height: 1.5;
+    word-wrap: break-word;
+    font-size: 1rem;
+  }
+
+  .user-msg {
+    background-color: #dbeafe; /* light blue */
+    margin-left: auto;
+    text-align: right;
+    color: #0d6efd;
+    border: 1px solid #b6d4fe;
+  }
+
+  .bot-msg {
+    background-color: #e2e3e5; /* light gray */
+    margin-right: auto;
+    color: #212529;
+    border: 1px solid #d3d3d3;
+  }
+
+  .typing {
+    display: inline-block;
+    font-size: 1.2rem;
+  }
+
+  .suggestions {
+    margin-top: 1.5rem;
+  }
+
+  .suggestions button {
+    margin: 0.3rem;
+    border-radius: 6px;
+    padding: 0.5rem 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #ced4da;
+    color: #495057;
+  }
+
+  .suggestions button:hover {
+    background-color: #e2e6ea;
+  }
+
+  input[type="text"] {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="chat-wrapper">
+  <div class="chat-window">
+
+    <h3 class="text-center mb-4">💬 ExpenseLynx AI Assistant</h3>
+
+    {% if not chat_history and not answer %}
+      <form method="POST">
+        <div class="mb-3">
+          <label class="form-label">Which month are we talking about?</label>
+          <select class="form-select" name="month" required>
+            {% for m in months_list %}
+              <option value="{{ m }}" {% if selected_month == m %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Data Source</label>
+          <select name="data_type" class="form-select">
+            <option value="manual" {% if selected_data_type == "manual" %}selected{% endif %}>Manual Entry</option>
+            <option value="csv" {% if selected_data_type == "csv" %}selected{% endif %}>CSV Upload</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Continue</button>
+      </form>
+    {% endif %}
+
+    {% if answer %}
+      <div class="message bot-msg">{{ answer }}</div>
+    {% endif %}
+
+    {% for chat in chat_history|reverse %}
+      <div class="message user-msg">You: {{ chat.question }}</div>
+      <div class="message bot-msg">AI: {{ chat.answer }}</div>
+    {% endfor %}
+
+    {% if selected_month and selected_data_type %}
+      <form method="POST" class="mt-4">
+        <div class="input-group">
+          <input type="text" name="question" class="form-control" placeholder="Ask anything about your expenses..." required>
+          <input type="hidden" name="month" value="{{ selected_month }}">
+          <input type="hidden" name="data_type" value="{{ selected_data_type }}">
+          <button class="btn btn-success" type="submit">Ask</button>
+        </div>
+      </form>
+
+      <!-- 🔮 Smart Suggestions -->
+      <div class="suggestions">
+        <strong>Try asking:</strong><br>
+        <form method="POST">
+          <input type="hidden" name="month" value="{{ selected_month }}">
+          <input type="hidden" name="data_type" value="{{ selected_data_type }}">
+          <button name="question" value="Where did I spend the most?" class="btn btn-outline-light">Top spending</button>
+          <button name="question" value="What category has the highest expense?" class="btn btn-outline-light">Highest category</button>
+          <button name="question" value="Suggest ways to save money." class="btn btn-outline-light">Savings tips</button>
+          <button name="question" value="How much did I spend on food?" class="btn btn-outline-light">Food expense</button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% extends "layout.html" %}
+
+{#{% block head %}
+<style>
+  .form-control, .form-select {
+    border-radius: 8px;
+  }
+  .category-block {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+  }
+</style>
+{% endblock %} #}
+
+
+{% block head %}
+<style>
+  .form-control, .form-select {
+    border-radius: 8px;
+    background-color: #ffffff;
+    color: #212529;
+    border: 1px solid #ced4da;
+  }
+
+  .form-control::placeholder {
+    color: #6c757d;
+  }
+
+  .category-block {
+    background: #f1f3f5; /* light neutral background */
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+</style>
+{% endblock %}
+
+
+{% block content %}
+{% set current_date = today %}
+<div class="container py-4">
+  <h2 class="mb-4 text-center text-primary">Add Your Budget and Expenses</h2>
+
+  <form method="POST" action="{{ url_for('add_expense') }}">
+
+    <!-- ✅ Section 1: Select Month -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">Select Month for These Expenses</h4>
+        <div class="mb-3">
+          <label for="month_year" class="form-label">Month</label>
+          <input type="month" class="form-control" name="month_year" id="month_year" required>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Section 2: Base Budget -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">Base Budget</h4>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="base_amount" class="form-label">Amount (₹)</label>
+            <input type="number" class="form-control" name="base_amount" id="base_amount" placeholder="e.g. 50000" required>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="time_range" class="form-label">Time Range</label>
+            <select class="form-select" name="time_range" id="time_range" required>
+              <option value="monthly" selected>Monthly</option>
+              <option value="weekly">Weekly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Section 3: Category-wise Expenses -->
+    <div class="card mb-4 shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">Category-wise Expenses</h4>
+        <div class="row">
+          {% set categories = ['Rent', 'Food', 'Travel', 'Electricity', 'Entertainment', 'Healthcare', 'Other'] %}
+          {% for cat in categories %}
+          <div class="col-md-6 mb-4">
+            <label for="category_{{ cat|lower }}" class="form-label">{{ cat }} (₹)</label>
+            <input type="number" step="0.01" class="form-control mb-2" name="category_{{ cat|lower }}" placeholder="₹ Amount">
+            <label for="date_{{ cat|lower }}" class="form-label small">Date</label>
+            <input type="date" class="form-control" name="date_{{ cat|lower }}" value="{{ current_date }}" max="{{ current_date }}">
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ Submit Button -->
+    <div class="text-center">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="fas fa-arrow-right me-2"></i> Proceed to Dashboard
+      </button>
+    </div>
+  </form>
+
+  <!-- 🔁 Divider -->
+  <hr class="my-5" />
+
+  <!-- ✅ CSV Upload Option -->
+  <h2 class="text-center text-light mb-4">Or Upload CSV File</h2>
+  <form method="POST" action="{{ url_for('upload_from_add_expense') }}" enctype="multipart/form-data" class="bg-dark text-white p-4 rounded shadow-sm">
+    <div class="mb-3">
+      <label for="file" class="form-label">Select your expense CSV file:</label>
+      <input type="file" class="form-control" id="file" name="file" required />
+    </div>
+    <button type="submit" class="btn btn-primary w-100">📁 Upload CSV</button>
+  </form>
+</div>
+{% endblock %}
